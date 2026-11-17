@@ -64,6 +64,70 @@
 
   const registryNotice=document.getElementById('registryNotice');
   const registrySay=(message,error=false)=>{registryNotice.textContent=message;registryNotice.className='notice show'+(error?' error':'');};
+
+  const csvFileInput=document.getElementById('schoolCsvFile');
+  const csvResult=document.getElementById('csvImportResult');
+  const csvTemplate='npsn,nama_sekolah,alamat,desa,kecamatan,nama_kontak,no_kontak\\n12345678,Contoh SMA Negeri 1,JL. Pendidikan No. 1,Contoh,Contoh,Operator Sekolah,081234567890\\n';
+  document.getElementById('downloadSchoolTemplate').addEventListener('click',()=>{
+    const blob=new Blob(['\\uFEFF'+csvTemplate],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='template-data-sekolah-jumbara.csv';a.click();URL.revokeObjectURL(url);
+  });
+  const parseCsv=text=>{
+    const rows=[];let row=[],cell='',quoted=false;
+    for(let i=0;i<text.length;i++){
+      const ch=text[i];
+      if(quoted){if(ch==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(ch==='"'){quoted=false;}else{cell+=ch;}}
+      else if(ch==='"'){quoted=true;}
+      else if(ch===','){row.push(cell);cell='';}
+      else if(ch==='\\n'){row.push(cell.replace(/\\r$/,''));rows.push(row);row=[];cell='';}
+      else{cell+=ch;}
+    }
+    if(quoted)throw new Error('CSV memiliki tanda kutip yang tidak berpasangan.');
+    if(cell.length||row.length){row.push(cell.replace(/\\r$/,''));rows.push(row);}
+    return rows.filter(r=>r.some(v=>v.trim()!==''));
+  };
+  const normalizeHeader=s=>s.replace(/^\\uFEFF/,'').trim().toLowerCase().replace(/[ -]+/g,'_');
+  csvFileInput.addEventListener('change',async()=>{
+    const file=csvFileInput.files?.[0];if(!file)return;
+    csvResult.textContent='Membaca file CSV...';csvResult.className='csv-result show';
+    try{
+      if(!file.name.toLowerCase().endsWith('.csv'))throw new Error('Pilih file dengan format .csv.');
+      if(file.size>5*1024*1024)throw new Error('Ukuran file maksimal 5 MB.');
+      const rows=parseCsv(await file.text());if(rows.length<2)throw new Error('CSV belum berisi baris data.');
+      const headers=rows[0].map(normalizeHeader);
+      const findHeader=(...names)=>names.map(n=>headers.indexOf(n)).find(i=>i>=0);
+      const col={npsn:findHeader('npsn'),name:findHeader('nama_sekolah','nama','name'),address:findHeader('alamat','address'),village:findHeader('desa','kelurahan','village'),district:findHeader('kecamatan','district'),contact_name:findHeader('nama_kontak','kontak','contact_name'),contact_phone:findHeader('no_kontak','nomor_kontak','telepon','no_telepon','contact_phone')};
+      if(col.name===undefined)throw new Error('Kolom nama_sekolah wajib tersedia. Unduh template untuk format yang benar.');
+      const records=[],seen=new Set();let invalid=0,duplicateFile=0;
+      rows.slice(1).forEach((r,index)=>{
+        const get=k=>col[k]===undefined?'':String(r[col[k]]??'').trim();
+        const name=get('name'),npsn=get('npsn');
+        if(!name||(npsn&&!/^\\d{8}$/.test(npsn))){invalid++;return;}
+        if(npsn&&seen.has(npsn)){duplicateFile++;return;}if(npsn)seen.add(npsn);
+        records.push({npsn:npsn||null,name,address:get('address')||null,village:get('village')||null,district:get('district')||null,contact_name:get('contact_name')||null,contact_phone:get('contact_phone')||null});
+      });
+      if(!records.length)throw new Error('Tidak ada baris valid untuk diimpor. Periksa nama sekolah dan format NPSN.');
+      const npsns=records.map(x=>x.npsn).filter(Boolean);const existing=new Set();
+      for(let i=0;i<npsns.length;i+=500){
+        const {data,error}=await client.from('schools').select('npsn').in('npsn',npsns.slice(i,i+500));if(error)throw error;
+        (data||[]).forEach(x=>existing.add(x.npsn));
+      }
+      const fresh=records.filter(x=>!x.npsn||!existing.has(x.npsn));const skippedExisting=records.length-fresh.length;
+      if(!fresh.length){csvResult.textContent='Tidak ada data baru. Semua NPSN sudah terdaftar atau duplikat dalam file.';return;}
+      const {data:{user}}=await client.auth.getUser();if(!user)throw new Error('Sesi login berakhir. Silakan masuk kembali.');
+      let imported=0;
+      for(let i=0;i<fresh.length;i+=100){
+        const batch=fresh.slice(i,i+100).map(x=>({...x,created_by:user.id}));
+        const {data,error}=await client.from('schools').insert(batch).select('id');if(error)throw error;
+        const members=data.map(x=>({school_id:x.id,user_id:user.id,member_role:'operator_sekolah'}));
+        const {error:memberError}=await client.from('school_members').insert(members);if(memberError)throw memberError;
+        imported+=data.length;
+      }
+      csvResult.textContent='Impor selesai: '+imported+' sekolah ditambahkan; '+(skippedExisting+duplicateFile)+' NPSN duplikat dilewati; '+invalid+' baris tidak valid dilewati.';
+      await loadRegistry();
+    }catch(error){csvResult.textContent='Impor gagal: '+(error.message||'Kesalahan tidak diketahui');csvResult.className='csv-result show error';}
+    finally{csvFileInput.value='';}
+  });
   const schoolForm=document.getElementById('schoolForm');
   const contingentForm=document.getElementById('contingentForm');
   const eventSelect=document.getElementById('contingentEvent');
