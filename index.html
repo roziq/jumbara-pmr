@@ -47,6 +47,12 @@
       <div class="panel-heading"><div><p class="eyebrow">PENDAFTARAN</p><h2>Data Sekolah & Kontingen</h2></div></div>
       <p class="muted">Kelola sekolah peserta dan kontingen pada setiap jenjang Jumbara.</p>
       <div id="registryNotice" class="notice" role="status" aria-live="polite"></div>
+      <div class="csv-import-box">
+        <div><h3>Impor banyak sekolah melalui CSV</h3><p>Unggah satu file CSV untuk menambahkan banyak sekolah sekaligus. Baris dengan NPSN yang sudah terdaftar akan dilewati.</p></div>
+        <div class="csv-actions"><button type="button" class="text-button" id="downloadSchoolTemplate">Unduh template CSV</button><label class="primary-button csv-upload-label" for="schoolCsvFile">Pilih file CSV</label><input id="schoolCsvFile" type="file" accept=".csv,text/csv" hidden></div>
+        <small>Kolom: npsn, nama_sekolah, alamat, desa, kecamatan, nama_kontak, no_kontak. NPSN boleh kosong, tetapi jika diisi harus 8 digit.</small>
+        <div id="csvImportResult" class="csv-result" aria-live="polite"></div>
+      </div>
       <div class="registry-grid">
         <form id="schoolForm" class="registry-form">
           <h3>Tambah sekolah</h3>
