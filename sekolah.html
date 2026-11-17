@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#c62828">
+<title>Portal Sekolah | Jumbara PMR</title><link rel="stylesheet" href="assets/css/styles.css">
+<style>
+.school-main{width:min(1100px,calc(100% - 32px));margin:28px auto 60px}.school-hero{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:22px}.school-hero h1{margin:4px 0;font-size:26px}.school-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.school-panel{background:#fff;border:1px solid #e7eaee;border-radius:14px;padding:20px;margin-bottom:18px}.school-panel h2,.school-panel h3{margin:0 0 14px}.school-form{display:grid;gap:12px}.school-form label{display:grid;gap:6px;font-size:12px;font-weight:700;color:#4d5962}.school-form input,.school-form select{height:42px;border:1px solid #dce2e6;border-radius:8px;padding:0 11px;font:inherit;font-size:13px;background:#fff}.school-form .primary-button{justify-self:start}.school-table{width:100%;border-collapse:collapse;font-size:12px}.school-table th,.school-table td{text-align:left;padding:10px 8px;border-bottom:1px solid #edf0f2}.school-table th{color:#68747d}.school-empty{padding:16px;background:#f7f8fa;border-radius:9px;color:#71808a;font-size:13px}.school-message{margin:12px 0;color:#287b50;font-size:13px}.school-message.error{color:#c62828}.school-meta{color:#6d7880;font-size:12px}.school-badge{display:inline-block;background:#fff1f1;color:#b42323;border-radius:20px;padding:6px 10px;font-size:11px;font-weight:700}
+@media(max-width:720px){.school-grid{grid-template-columns:1fr}.school-hero{align-items:flex-start;flex-direction:column}.school-panel{padding:16px}.school-table{display:block;overflow:auto;white-space:nowrap}}
+</style></head>
+<body>
+<header class="topbar"><a class="brand" href="sekolah.html"><span class="brand-mark">+</span><span><strong>JUMBARA PMR</strong><small>PMI Kabupaten Purbalingga</small></span></a><div class="account-tools"><span class="identity"><small id="schoolEmail">Memuat akun...</small><b>OPERATOR SEKOLAH</b></span><button id="logoutButton" class="logout-button" type="button">Keluar</button></div></header>
+<main class="school-main">
+<section class="school-hero"><div><p class="eyebrow">PORTAL PENDAFTARAN MANDIRI</p><h1>Portal Sekolah</h1><p class="muted">Daftarkan sekolah, kontingen, dan peserta Jumbara secara mandiri.</p></div><span class="school-badge">Akun Sekolah</span></section>
+<div id="schoolNotice" class="school-message" role="status" aria-live="polite"></div>
+<section class="school-panel" id="schoolSetupPanel"><h2>1. Lengkapi data sekolah</h2><p class="school-meta">Isi data sekolah satu kali. NPSN harus 8 digit.</p>
+<form id="schoolSetupForm" class="school-form">
+<label>NPSN<input name="npsn" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" required placeholder="8 digit NPSN"></label>
+<label>Nama sekolah<input name="name" required maxlength="180" placeholder="Nama resmi sekolah"></label>
+<label>Jenjang sekolah<select name="school_level" required><option value="">Pilih jenjang</option><option>SD</option><option>SMP</option><option>SMA</option><option>SMK</option><option>MI</option><option>MTs</option><option>MA</option></select></label>
+<label>Kecamatan<input name="district" required maxlength="100" placeholder="Kecamatan"></label>
+<label>Alamat sekolah<input name="address" required maxlength="250" placeholder="Alamat lengkap"></label>
+<button class="primary-button" type="submit">Simpan data sekolah</button></form></section>
+<section id="schoolWorkspace" hidden>
+<section class="school-panel"><h2 id="schoolNameHeading">Sekolah</h2><p id="schoolMeta" class="school-meta"></p><span class="school-badge">Data sekolah tersimpan</span></section>
+<div class="school-grid">
+<section class="school-panel"><h2>2. Daftarkan kontingen</h2><form id="contingentForm" class="school-form">
+<label>Edisi Jumbara<select name="event_id" id="eventSelect" required><option value="">Memuat edisi...</option></select></label>
+<label>Jenjang PMR<select name="event_level_id" id="levelSelect" required><option value="">Pilih edisi dahulu</option></select></label>
+<label>Nama kontingen<input name="name" required maxlength="120" placeholder="Nama kontingen"></label>
+<button class="primary-button" type="submit">Daftarkan kontingen</button></form></section>
+<section class="school-panel"><h2>3. Tambahkan peserta</h2><form id="participantForm" class="school-form">
+<label>Kontingen<select name="contingent_id" id="participantContingent" required><option value="">Daftarkan kontingen dahulu</option></select></label>
+<label>Nama lengkap peserta<input name="full_name" required maxlength="150" placeholder="Nama sesuai identitas"></label>
+<label>NISN (opsional, 10 digit)<input name="nisn" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="Nomor Induk Siswa Nasional"></label>
+<label>Jenis kelamin<select name="gender"><option value="">Pilih (opsional)</option><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></label>
+<label>Kelas<input name="class_name" maxlength="30" placeholder="Contoh: VIII A"></label>
+<button class="primary-button" type="submit">Simpan peserta</button></form></section>
+</div>
+<section class="school-panel"><h2>Daftar kontingen</h2><div id="contingentList" class="school-empty">Memuat kontingen...</div></section>
+<section class="school-panel"><h2>Daftar peserta</h2><div id="participantList" class="school-empty">Memuat peserta...</div></section>
+</section>
+<footer class="footer"><span>Ekosistem Digital Jumbara PMR · PMI Kabupaten Purbalingga</span><span>Portal Sekolah</span></footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script><script src="assets/js/config.js"></script><script src="assets/js/school.js"></script>
+</body></html>
