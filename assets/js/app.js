@@ -1,0 +1,5 @@
+(() => {
+ const sidebar=document.getElementById('sidebar'); const menuToggle=document.getElementById('menuToggle'); const links=document.querySelectorAll('[data-view]');
+ if(menuToggle&&sidebar) menuToggle.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open));});
+ links.forEach(link=>link.addEventListener('click',event=>{event.preventDefault();const view=link.dataset.view;document.querySelectorAll('.nav-link,.bottom-nav a').forEach(item=>item.classList.toggle('active',item.dataset.view===view));const target=document.getElementById(view);if(target)target.scrollIntoView({behavior:'smooth',block:'start'});else{const labels={kegiatan:'Data Kegiatan',kontingen:'Kontingen',peserta:'Peserta',penilaian:'Penilaian',hasil:'Hasil & Peringkat',laporan:'Laporan',pengaturan:'Pengaturan'};window.alert((labels[view]||'Modul')+' belum diaktifkan. Modul akan dibangun bertahap dan dihubungkan ke Supabase.');}if(sidebar)sidebar.classList.remove('open');if(menuToggle)menuToggle.setAttribute('aria-expanded','false');}));
+})();
