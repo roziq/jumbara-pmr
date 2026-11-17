@@ -67,9 +67,9 @@
 
   const csvFileInput=document.getElementById('schoolCsvFile');
   const csvResult=document.getElementById('csvImportResult');
-  const csvTemplate='npsn,nama,jenjang,kecamatan,alamat\\n12345678,SMK Negeri 1 Purbalingga,SMK,Purbalingga,JL. Pendidikan No. 1\\n';
+  const csvTemplate='npsn,nama,jenjang,kecamatan,alamat\n12345678,SMK Negeri 1 Purbalingga,SMK,Purbalingga,JL. Pendidikan No. 1\n';
   document.getElementById('downloadSchoolTemplate').addEventListener('click',()=>{
-    const blob=new Blob(['\\uFEFF'+csvTemplate],{type:'text/csv;charset=utf-8;'});
+    const blob=new Blob(['\uFEFF'+csvTemplate],{type:'text/csv;charset=utf-8;'});
     const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='template-data-sekolah-jumbara.csv';a.click();URL.revokeObjectURL(url);
   });
   const parseCsv=text=>{
@@ -79,14 +79,14 @@
       if(quoted){if(ch==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(ch==='"'){quoted=false;}else{cell+=ch;}}
       else if(ch==='"'){quoted=true;}
       else if(ch===','){row.push(cell);cell='';}
-      else if(ch==='\\n'){row.push(cell.replace(/\\r$/,''));rows.push(row);row=[];cell='';}
+      else if(ch==='\n'){row.push(cell.replace(/\r$/,''));rows.push(row);row=[];cell='';}
       else{cell+=ch;}
     }
     if(quoted)throw new Error('CSV memiliki tanda kutip yang tidak berpasangan.');
-    if(cell.length||row.length){row.push(cell.replace(/\\r$/,''));rows.push(row);}
+    if(cell.length||row.length){row.push(cell.replace(/\r$/,''));rows.push(row);}
     return rows.filter(r=>r.some(v=>v.trim()!==''));
   };
-  const normalizeHeader=s=>s.replace(/^\\uFEFF/,'').trim().toLowerCase().replace(/[ -]+/g,'_');
+  const normalizeHeader=s=>s.replace(/^\uFEFF/,'').trim().toLowerCase().replace(/[ -]+/g,'_');
   csvFileInput.addEventListener('change',async()=>{
     const file=csvFileInput.files?.[0];if(!file)return;
     csvResult.textContent='Membaca file CSV...';csvResult.className='csv-result show';
@@ -101,9 +101,9 @@
       const records=[],seen=new Set();let invalid=0,duplicateFile=0;
       rows.slice(1).forEach((r,index)=>{
         const get=k=>col[k]===undefined?'':String(r[col[k]]??'').trim();
-        const name=get('name'),npsn=get('npsn');
-        if(!name||(npsn&&!/^\\d{8}$/.test(npsn))){invalid++;return;}
-        if(npsn&&seen.has(npsn)){duplicateFile++;return;}if(npsn)seen.add(npsn);
+        const name=get('name'),npsn=get('npsn'),school_level=get('school_level'),district=get('district'),address=get('address');
+        if(!name||!school_level||!district||!address||!/^\d{8}$/.test(npsn)){invalid++;return;}
+        if(seen.has(npsn)){duplicateFile++;return;}seen.add(npsn);
         records.push({npsn,name,school_level,district,address});
       });
       if(!records.length)throw new Error('Tidak ada baris valid untuk diimpor. Periksa nama sekolah dan format NPSN.');
