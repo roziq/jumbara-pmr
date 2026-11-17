@@ -10,7 +10,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="#beranda" aria-label="Jumbara PMR beranda"><span class="brand-mark">+</span><span><strong>JUMBARA PMR</strong><small>PMI Kabupaten Purbalingga</small></span></a>
-    <button class="menu-toggle" id="menuToggle" aria-label="Buka navigasi" aria-expanded="false">☰</button>
+    <div class="account-tools"><small id="currentUser">Memuat akun...</small><button id="logoutButton" class="logout-button" type="button">Keluar</button></div><button class="menu-toggle" id="menuToggle" aria-label="Buka navigasi" aria-expanded="false">☰</button>
   </header>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
@@ -47,7 +47,7 @@
             <div class="level-row"><span class="level-badge wi">WI</span><div><strong>PMR Wira</strong><small>Jenjang Wira</small></div><span class="level-state">Belum diatur</span></div>
           </div>
         </article>
-        <article class="panel progress-panel"><div class="panel-heading"><div><p class="eyebrow">TAHAP PERSIAPAN</p><h2>Konfigurasi sistem</h2></div></div><div class="progress-track"><span></span></div><p class="progress-caption">Fondasi antarmuka tersedia. Koneksi database dan modul operasional belum diaktifkan.</p><ul class="setup-list"><li><span class="check pending">1</span> Koneksi Supabase</li><li><span class="check pending">2</span> Login dan hak akses</li><li><span class="check pending">3</span> Data kegiatan dan jenjang</li><li><span class="check pending">4</span> Kontingen dan peserta</li><li><span class="check pending">5</span> Penilaian dan publikasi hasil</li></ul></article>
+        <article class="panel progress-panel"><div class="panel-heading"><div><p class="eyebrow">TAHAP PERSIAPAN</p><h2>Konfigurasi sistem</h2></div></div><div class="progress-track"><span></span></div><p class="progress-caption">Dashboard dan koneksi autentikasi telah disiapkan. Modul operasional sedang dibangun bertahap.</p><ul class="setup-list"><li><span class="check pending">✓</span> Database inti dan RLS</li><li><span class="check pending">✓</span> Form login dan pendaftaran</li><li><span class="check pending">3</span> Penetapan administrator</li><li><span class="check pending">4</span> Kontingen dan peserta</li><li><span class="check pending">5</span> Penilaian dan publikasi hasil</li></ul></article>
       </section>
       <section class="panel module-panel"><div class="panel-heading"><div><p class="eyebrow">MODUL APLIKASI</p><h2>Akses cepat</h2></div></div><div class="module-grid"><button class="module-tile" data-view="kegiatan"><span>▣</span><strong>Data Kegiatan</strong><small>Atur edisi dan jenjang</small></button><button class="module-tile" data-view="kontingen"><span>♧</span><strong>Kontingen</strong><small>Pendaftaran kontingen</small></button><button class="module-tile" data-view="peserta"><span>♙</span><strong>Peserta</strong><small>Data dan identitas peserta</small></button><button class="module-tile" data-view="penilaian"><span>✓</span><strong>Penilaian</strong><small>Input nilai oleh juri</small></button><button class="module-tile" data-view="hasil"><span>▤</span><strong>Hasil & Peringkat</strong><small>Rekap dan papan skor</small></button><button class="module-tile" data-view="laporan"><span>▧</span><strong>Laporan</strong><small>Arsip dan dokumen</small></button></div></section>
       <footer class="footer">Ekosistem Digital Jumbara PMR · PMI Kabupaten Purbalingga <span>Fondasi aplikasi</span></footer>
@@ -55,5 +55,8 @@
   </div>
   <nav class="bottom-nav" aria-label="Navigasi mobile"><a class="active" href="#beranda" data-view="beranda">⌂<small>Beranda</small></a><a href="#kegiatan" data-view="kegiatan">▣<small>Kegiatan</small></a><a href="#kontingen" data-view="kontingen">♧<small>Kontingen</small></a><a href="#penilaian" data-view="penilaian">✓<small>Nilai</small></a><a href="#hasil" data-view="hasil">▤<small>Hasil</small></a></nav>
   <script src="assets/js/app.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/auth.js" defer></script>
 </body>
 </html>
