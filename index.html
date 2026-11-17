@@ -50,7 +50,7 @@
       <div class="csv-import-box">
         <div><h3>Impor banyak sekolah melalui CSV</h3><p>Unggah satu file CSV untuk menambahkan banyak sekolah sekaligus. Baris dengan NPSN yang sudah terdaftar akan dilewati.</p></div>
         <div class="csv-actions"><button type="button" class="text-button" id="downloadSchoolTemplate">Unduh template CSV</button><label class="primary-button csv-upload-label" for="schoolCsvFile">Pilih file CSV</label><input id="schoolCsvFile" type="file" accept=".csv,text/csv" hidden></div>
-        <small>Kolom: npsn, nama_sekolah, alamat, desa, kecamatan, nama_kontak, no_kontak. NPSN boleh kosong, tetapi jika diisi harus 8 digit.</small>
+        <small>Kolom: npsn, nama_sekolah, alamat, desa, kecamatan, nama_kontak, no_kontak. Format wajib: npsn, nama, jenjang, kecamatan, alamat. NPSN harus 8 digit; semua kolom wajib diisi.</small>
         <div id="csvImportResult" class="csv-result" aria-live="polite"></div>
       </div>
       <div class="registry-grid">
@@ -58,10 +58,9 @@
           <h3>Tambah sekolah</h3>
           <label>NPSN (8 digit)<input name="npsn" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="Opsional"></label>
           <label>Nama sekolah<input name="name" required maxlength="180" placeholder="Nama sekolah"></label>
+          <label>Jenjang sekolah<input name="school_level" required maxlength="30" placeholder="Contoh: SD, SMP, SMA, SMK"></label>
           <label>Alamat<input name="address" maxlength="250" placeholder="Alamat sekolah"></label>
-          <label>Kecamatan<input name="district" maxlength="100" placeholder="Kecamatan"></label>
-          <label>Nama kontak<input name="contact_name" maxlength="120" placeholder="Nama operator sekolah"></label>
-          <label>Nomor kontak<input name="contact_phone" maxlength="30" placeholder="Nomor telepon"></label>
+          <label>Kecamatan<input name="district" required maxlength="100" placeholder="Kecamatan"></label>
           <button class="primary-button" type="submit">Simpan sekolah</button>
         </form>
         <form id="contingentForm" class="registry-form">
