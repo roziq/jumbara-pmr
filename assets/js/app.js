@@ -67,7 +67,7 @@
 
   const csvFileInput=document.getElementById('schoolCsvFile');
   const csvResult=document.getElementById('csvImportResult');
-  const csvTemplate='npsn,nama_sekolah,alamat,desa,kecamatan,nama_kontak,no_kontak\\n12345678,Contoh SMA Negeri 1,JL. Pendidikan No. 1,Contoh,Contoh,Operator Sekolah,081234567890\\n';
+  const csvTemplate='npsn,nama,jenjang,kecamatan,alamat\\n12345678,SMK Negeri 1 Purbalingga,SMK,Purbalingga,JL. Pendidikan No. 1\\n';
   document.getElementById('downloadSchoolTemplate').addEventListener('click',()=>{
     const blob=new Blob(['\\uFEFF'+csvTemplate],{type:'text/csv;charset=utf-8;'});
     const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='template-data-sekolah-jumbara.csv';a.click();URL.revokeObjectURL(url);
@@ -96,15 +96,15 @@
       const rows=parseCsv(await file.text());if(rows.length<2)throw new Error('CSV belum berisi baris data.');
       const headers=rows[0].map(normalizeHeader);
       const findHeader=(...names)=>names.map(n=>headers.indexOf(n)).find(i=>i>=0);
-      const col={npsn:findHeader('npsn'),name:findHeader('nama_sekolah','nama','name'),address:findHeader('alamat','address'),village:findHeader('desa','kelurahan','village'),district:findHeader('kecamatan','district'),contact_name:findHeader('nama_kontak','kontak','contact_name'),contact_phone:findHeader('no_kontak','nomor_kontak','telepon','no_telepon','contact_phone')};
-      if(col.name===undefined)throw new Error('Kolom nama_sekolah wajib tersedia. Unduh template untuk format yang benar.');
+      const col={npsn:findHeader('npsn'),name:findHeader('nama','nama_sekolah','name'),school_level:findHeader('jenjang','school_level','tingkat'),district:findHeader('kecamatan','district'),address:findHeader('alamat','address')};
+      const required=['npsn','name','school_level','district','address'];const missing=required.filter(k=>col[k]===undefined);if(missing.length)throw new Error('Kolom wajib belum lengkap: '+missing.map(k=>({npsn:'npsn',name:'nama',school_level:'jenjang',district:'kecamatan',address:'alamat'}[k])).join(', ')+'. Unduh template CSV terbaru.');
       const records=[],seen=new Set();let invalid=0,duplicateFile=0;
       rows.slice(1).forEach((r,index)=>{
         const get=k=>col[k]===undefined?'':String(r[col[k]]??'').trim();
         const name=get('name'),npsn=get('npsn');
         if(!name||(npsn&&!/^\\d{8}$/.test(npsn))){invalid++;return;}
         if(npsn&&seen.has(npsn)){duplicateFile++;return;}if(npsn)seen.add(npsn);
-        records.push({npsn:npsn||null,name,address:get('address')||null,village:get('village')||null,district:get('district')||null,contact_name:get('contact_name')||null,contact_phone:get('contact_phone')||null});
+        records.push({npsn,name,school_level,district,address});
       });
       if(!records.length)throw new Error('Tidak ada baris valid untuk diimpor. Periksa nama sekolah dan format NPSN.');
       const npsns=records.map(x=>x.npsn).filter(Boolean);const existing=new Set();
@@ -135,7 +135,7 @@
   const schoolSelect=document.getElementById('contingentSchool');
   const loadRegistry=async()=>{
     const [{data:schools,error:schoolError},{data:events,error:eventError},{data:contingents,error:contingentError}]=await Promise.all([
-      client.from('schools').select('id,name,npsn,district').order('name'),
+      client.from('schools').select('id,name,npsn,school_level,district').order('name'),
       client.from('jumbara_events').select('id,name,event_year,status,jumbara_event_levels(id,level_code,is_enabled)').order('event_year',{ascending:false}),
       client.from('contingents').select('id,contingent_code,name,status,schools(name),jumbara_events(name,event_year),jumbara_event_levels(level_code)').order('created_at',{ascending:false})
     ]);
@@ -156,7 +156,7 @@
     e.preventDefault();const button=schoolForm.querySelector('button[type=submit]');button.disabled=true;
     try{
       const fd=new FormData(schoolForm);const {data:{user}}=await client.auth.getUser();
-      const payload={name:String(fd.get('name')).trim(),npsn:String(fd.get('npsn')).trim()||null,address:String(fd.get('address')).trim()||null,district:String(fd.get('district')).trim()||null,contact_name:String(fd.get('contact_name')).trim()||null,contact_phone:String(fd.get('contact_phone')).trim()||null,created_by:user.id};
+      const payload={npsn:String(fd.get('npsn')).trim()||null,name:String(fd.get('name')).trim(),school_level:String(fd.get('school_level')).trim()||null,district:String(fd.get('district')).trim()||null,address:String(fd.get('address')).trim()||null,created_by:user.id};
       const {data:school,error}=await client.from('schools').insert(payload).select('id').single();if(error)throw error;
       const {error:memberError}=await client.from('school_members').insert({school_id:school.id,user_id:user.id,member_role:'operator_sekolah'});
       if(memberError)throw memberError;
