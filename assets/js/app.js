@@ -61,5 +61,54 @@
     }catch(error){say(error.message||'Gagal menyimpan edisi.',true);}
     finally{button.disabled=false;}
   });
-  client.auth.getSession().then(({data})=>{if(data.session)loadEvents();});
+
+  const registryNotice=document.getElementById('registryNotice');
+  const registrySay=(message,error=false)=>{registryNotice.textContent=message;registryNotice.className='notice show'+(error?' error':'');};
+  const schoolForm=document.getElementById('schoolForm');
+  const contingentForm=document.getElementById('contingentForm');
+  const eventSelect=document.getElementById('contingentEvent');
+  const levelSelect=document.getElementById('contingentLevel');
+  const schoolSelect=document.getElementById('contingentSchool');
+  const loadRegistry=async()=>{
+    const [{data:schools,error:schoolError},{data:events,error:eventError},{data:contingents,error:contingentError}]=await Promise.all([
+      client.from('schools').select('id,name,npsn,district').order('name'),
+      client.from('jumbara_events').select('id,name,event_year,status,jumbara_event_levels(id,level_code,is_enabled)').order('event_year',{ascending:false}),
+      client.from('contingents').select('id,contingent_code,name,status,schools(name),jumbara_events(name,event_year),jumbara_event_levels(level_code)').order('created_at',{ascending:false})
+    ]);
+    if(schoolError||eventError||contingentError){registrySay((schoolError||eventError||contingentError).message,true);return;}
+    schoolSelect.innerHTML='<option value="">Pilih sekolah</option>'+schools.map(s=>'<option value="'+s.id+'">'+escapeHtml(s.name)+(s.npsn?' · '+escapeHtml(s.npsn):'')+'</option>').join('');
+    eventSelect.innerHTML='<option value="">Pilih edisi</option>'+events.filter(e=>['PERSIAPAN','PENDAFTARAN'].includes(e.status)).map(e=>'<option value="'+e.id+'">'+escapeHtml(e.name)+' · '+e.event_year+'</option>').join('');
+    document.getElementById('schoolsList').innerHTML=schools.length?schools.map(s=>'<div class="simple-item"><b>'+escapeHtml(s.name)+'</b><small>'+(s.npsn?'NPSN '+escapeHtml(s.npsn):'NPSN belum diisi')+(s.district?' · '+escapeHtml(s.district):'')+'</small></div>').join(''):'<p class="muted">Belum ada data sekolah.</p>';
+    document.getElementById('contingentsList').innerHTML=contingents.length?contingents.map(c=>'<div class="simple-item"><b>'+escapeHtml(c.contingent_code)+' · '+escapeHtml(c.name)+'</b><small>'+escapeHtml(c.schools?.name||'')+' · '+escapeHtml(c.jumbara_event_levels?.level_code||'')+' · '+escapeHtml(c.jumbara_events?.name||'')+'</small></div>').join(''):'<p class="muted">Belum ada kontingen.</p>';
+    eventSelect.dataset.events=JSON.stringify(events);
+  };
+  eventSelect.addEventListener('change',()=>{
+    const events=JSON.parse(eventSelect.dataset.events||'[]');
+    const selected=events.find(e=>e.id===eventSelect.value);
+    const levels=(selected?.jumbara_event_levels||[]).filter(l=>l.is_enabled);
+    levelSelect.innerHTML='<option value="">Pilih jenjang</option>'+levels.map(l=>'<option value="'+l.id+'">'+l.level_code+' · '+levelLabel[l.level_code]+'</option>').join('');
+  });
+  schoolForm.addEventListener('submit',async e=>{
+    e.preventDefault();const button=schoolForm.querySelector('button[type=submit]');button.disabled=true;
+    try{
+      const fd=new FormData(schoolForm);const {data:{user}}=await client.auth.getUser();
+      const payload={name:String(fd.get('name')).trim(),npsn:String(fd.get('npsn')).trim()||null,address:String(fd.get('address')).trim()||null,district:String(fd.get('district')).trim()||null,contact_name:String(fd.get('contact_name')).trim()||null,contact_phone:String(fd.get('contact_phone')).trim()||null,created_by:user.id};
+      const {data:school,error}=await client.from('schools').insert(payload).select('id').single();if(error)throw error;
+      const {error:memberError}=await client.from('school_members').insert({school_id:school.id,user_id:user.id,member_role:'operator_sekolah'});
+      if(memberError)throw memberError;
+      registrySay('Data sekolah berhasil disimpan dan akun saat ini ditautkan sebagai operator sekolah.');schoolForm.reset();await loadRegistry();
+    }catch(error){registrySay(error.message||'Gagal menyimpan sekolah.',true);}
+    finally{button.disabled=false;}
+  });
+  contingentForm.addEventListener('submit',async e=>{
+    e.preventDefault();const button=contingentForm.querySelector('button[type=submit]');button.disabled=true;
+    try{
+      const fd=new FormData(contingentForm);const {data:{user}}=await client.auth.getUser();
+      const {error}=await client.from('contingents').insert({event_id:fd.get('event_id'),event_level_id:fd.get('event_level_id'),school_id:fd.get('school_id'),name:String(fd.get('name')).trim(),created_by:user.id});
+      if(error)throw error;
+      registrySay('Kontingen berhasil didaftarkan. Kode kontingen dibuat otomatis.');contingentForm.reset();levelSelect.innerHTML='<option value="">Pilih edisi dahulu</option>';await loadRegistry();
+    }catch(error){registrySay(error.message||'Gagal mendaftarkan kontingen.',true);}
+    finally{button.disabled=false;}
+  });
+  client.auth.getSession().then(({data})=>{if(data.session){loadEvents();loadRegistry();}});
 })();
