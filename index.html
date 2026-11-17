@@ -42,6 +42,37 @@
       </form>
       <div id="eventsList" class="events-list"><div class="empty-state">Memuat data kegiatan...</div></div>
     </section>
+
+    <section class="panel registry-panel" id="data-sekolah">
+      <div class="panel-heading"><div><p class="eyebrow">PENDAFTARAN</p><h2>Data Sekolah & Kontingen</h2></div></div>
+      <p class="muted">Kelola sekolah peserta dan kontingen pada setiap jenjang Jumbara.</p>
+      <div id="registryNotice" class="notice" role="status" aria-live="polite"></div>
+      <div class="registry-grid">
+        <form id="schoolForm" class="registry-form">
+          <h3>Tambah sekolah</h3>
+          <label>NPSN (8 digit)<input name="npsn" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" placeholder="Opsional"></label>
+          <label>Nama sekolah<input name="name" required maxlength="180" placeholder="Nama sekolah"></label>
+          <label>Alamat<input name="address" maxlength="250" placeholder="Alamat sekolah"></label>
+          <label>Kecamatan<input name="district" maxlength="100" placeholder="Kecamatan"></label>
+          <label>Nama kontak<input name="contact_name" maxlength="120" placeholder="Nama operator sekolah"></label>
+          <label>Nomor kontak<input name="contact_phone" maxlength="30" placeholder="Nomor telepon"></label>
+          <button class="primary-button" type="submit">Simpan sekolah</button>
+        </form>
+        <form id="contingentForm" class="registry-form">
+          <h3>Daftarkan kontingen</h3>
+          <label>Edisi Jumbara<select name="event_id" id="contingentEvent" required><option value="">Memuat edisi...</option></select></label>
+          <label>Jenjang<select name="event_level_id" id="contingentLevel" required><option value="">Pilih edisi dahulu</option></select></label>
+          <label>Sekolah<select name="school_id" id="contingentSchool" required><option value="">Memuat sekolah...</option></select></label>
+          <label>Nama kontingen<input name="name" required maxlength="120" placeholder="Contoh: Kontingen SMP Negeri 1"></label>
+          <button class="primary-button" type="submit">Daftarkan kontingen</button>
+          <small>Kode kontingen dibuat otomatis oleh sistem.</small>
+        </form>
+      </div>
+      <div class="registry-lists">
+        <div><h3>Daftar sekolah</h3><div id="schoolsList" class="simple-list">Memuat sekolah...</div></div>
+        <div><h3>Daftar kontingen</h3><div id="contingentsList" class="simple-list">Memuat kontingen...</div></div>
+      </div>
+    </section>
     <section class="admin-shortcuts">
       <article class="panel shortcut"><span>♙</span><div><b>Pengguna & peran</b><p>Pengaturan akun dan kewenangan akan dibangun pada tahap berikutnya.</p><small>Belum diaktifkan</small></div></article>
       <article class="panel shortcut"><span>⚙</span><div><b>Template penilaian</b><p>Pengaturan pos, kriteria, juri, dan metode perhitungan nilai.</p><small>Belum diaktifkan</small></div></article>
